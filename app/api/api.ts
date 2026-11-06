@@ -5,6 +5,7 @@ import { MembershipDetailsDTO, LeaseInvitationCreateDTO, LeaseInvitationDetailsD
 import { CreateRentalProfileDTO, RentalProfileDetailsDTO } from '../models/rentalprofile';
 import { LeaseCreateDTO, LeaseDetailsDTO, LeaseStatus, LeaseTermsUpdateDTO, MonthlyCollectionSummaryDTO, RentSummaryDTO } from '../models/lease';
 import { PaymentTransactionCreateDTO } from '../models/payments';
+import { CreateViewingBookingDTO, ViewingBookingDetailsDTO } from '../models/property';
 import { recordPayment } from '../services/paymentService';
 
 const apiUrl = import.meta.env.VITE_RENT_MANAGER_API_URL;
@@ -296,6 +297,25 @@ export const paymentApi = {
     return handleResponse(res.data);
   }
  
+};
+
+export const viewingApi = {
+  createBooking: async (
+    requestBody: CreateViewingBookingDTO,
+    token: string,
+  ): Promise<ViewingBookingDetailsDTO> => {
+    const res = await apiClient.post<ApiResponse<ViewingBookingDetailsDTO>>(
+      `/viewings/bookings`,
+      requestBody,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+
+    return handleResponse(res.data);
+  },
 };
 
 export function handleResponse<T>(response: ApiResponse<T>): T {

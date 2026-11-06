@@ -1,87 +1,35 @@
-# Welcome to React Router!
+# LA Unit Listings
 
-A modern, production-ready template for building full-stack React applications using React Router.
+Public-facing rental listings with filters, pagination, and authenticated viewing requests.
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/remix-run/react-router-templates/tree/main/default)
+## Run locally
 
-## Features
-
-- 🚀 Server-side rendering
-- ⚡️ Hot Module Replacement (HMR)
-- 📦 Asset bundling and optimization
-- 🔄 Data loading and mutations
-- 🔒 TypeScript by default
-- 🎉 TailwindCSS for styling
-- 📖 [React Router docs](https://reactrouter.com/)
-
-## Getting Started
-
-### Installation
-
-Install the dependencies:
-
-```bash
+```sh
 npm install
-```
-
-### Development
-
-Start the development server with HMR:
-
-```bash
 npm run dev
 ```
 
-Your application will be available at `http://localhost:4175`.
+Configure these Vite environment variables before starting the app:
 
-## Building for Production
+- `VITE_PROPERTY_MANAGER_API_URL` — property-manager service origin.
+- `VITE_RENT_MANAGER_API_URL` — rent-manager service origin.
+- `VITE_AUTH_URL` — sign-in page URL.
+- `VITE_RENT_MANAGER_URL` — default post-sign-in destination used by the existing auth flow.
 
-Create a production build:
+The unit browser calls `GET /property-manager/v1/units` with `listed=true`,
+`status=AVAILABLE`, paging, sorting, and optional search filters. It expects
+`ApiResponse<ListedUnitsPageDTO>` where the page has `content`, `totalElements`,
+`totalPages`, `number`, and `size`.
 
-```bash
+Viewing requests require a signed-in renter and call
+`POST /rent-manager/v1/viewings/bookings` with a bearer token. The frontend
+currently sends `{ unitId, startTime, endTime, notes }`, with date-times formatted
+as local ISO date-time strings (no timezone suffix). Confirm these request field
+names and the page DTO against the service contracts when they are finalized.
+
+## Validate
+
+```sh
 npm run build
+npx tsc --noEmit
 ```
-
-## Deployment
-
-### Docker Deployment
-
-To build and run using Docker:
-
-```bash
-docker build -t my-app .
-
-# Run the container
-docker run -p 3000:3000 my-app
-```
-
-The containerized application can be deployed to any platform that supports Docker, including:
-
-- AWS ECS
-- Google Cloud Run
-- Azure Container Apps
-- Digital Ocean App Platform
-- Fly.io
-- Railway
-
-### DIY Deployment
-
-If you're familiar with deploying Node applications, the built-in app server is production-ready.
-
-Make sure to deploy the output of `npm run build`
-
-```
-├── package.json
-├── package-lock.json (or pnpm-lock.yaml, or bun.lockb)
-├── build/
-│   ├── client/    # Static assets
-│   └── server/    # Server-side code
-```
-
-## Styling
-
-This template comes with [Tailwind CSS](https://tailwindcss.com/) already configured for a simple default starting experience. You can use whatever CSS framework you prefer.
-
----
-
-Built with ❤️ using React Router.

@@ -56,6 +56,78 @@ export interface UnitDetailsDTO {
   buildingId: number;
 }
 
+export interface ListedUnitDTO extends UnitDetailsDTO {
+  listed?: boolean;
+  description?: string;
+  listingTitle?: string;
+  buildingName?: string;
+  propertyName?: string;
+  address?: Partial<AddressDTO> & { displayName?: string };
+  propertyAddress?: Partial<AddressDTO> & { displayName?: string };
+  location?: Partial<LocationDetailsDTO> & {
+    address?: Partial<AddressDTO> & { displayName?: string };
+  };
+  building?: {
+    name?: string;
+    property?: {
+      name?: string;
+      location?: Partial<LocationDetailsDTO> & {
+        address?: Partial<AddressDTO> & { displayName?: string };
+      };
+    };
+  };
+  property?: {
+    name?: string;
+    location?: Partial<LocationDetailsDTO> & {
+      address?: Partial<AddressDTO> & { displayName?: string };
+    };
+  };
+  images?: string[];
+}
+
+export interface ListedUnitsPageDTO {
+  content: ListedUnitDTO[];
+  totalElements: number;
+  totalPages: number;
+  number: number;
+  size: number;
+}
+
+export interface ListedUnitsQuery {
+  page: number;
+  size: number;
+  sortBy: "rentAmount";
+  direction: "asc" | "desc";
+  listed: boolean;
+  status?: UnitStatus;
+  type?: UnitType;
+  city?: string;
+  minBedrooms?: number;
+  minRent?: number;
+  maxRent?: number;
+  query?: string;
+}
+
+export interface CreateViewingBookingDTO {
+  unitId: number;
+  startTime: string;
+  endTime: string;
+  notes?: string;
+}
+
+export interface ViewingBookingDetailsDTO {
+  id: number;
+  rentalProfileId: number;
+  propertyId: number;
+  startTime: string;
+  endTime: string;
+  requesterUserId: number;
+  status: string;
+  serviceFee: number;
+  feePaid: boolean;
+  notes?: string;
+}
+
 export interface UnitCreateDTO {
   rentalProfileId: number;
   unitNumber: string;

@@ -1,7 +1,14 @@
 import axios from "axios";
 import { ApiResponse } from "../models/common";
 import { ApiError } from "../models/error";
-import { PropertyCreateDTO, PropertyDetailsDTO, UnitCreateDTO, UnitDetailsDTO } from "../models/property";
+import {
+    ListedUnitsPageDTO,
+    ListedUnitsQuery,
+    PropertyCreateDTO,
+    PropertyDetailsDTO,
+    UnitCreateDTO,
+    UnitDetailsDTO,
+} from "../models/property";
 
 const propertyManagerApiUrl = import.meta.env.VITE_PROPERTY_MANAGER_API_URL
 const propertyManagerApiClient = axios.create({
@@ -46,6 +53,26 @@ propertyManagerApiClient.interceptors.response.use(
 );
 
 export const propertyManagerApi = {
+    getListedUnits: async (
+        query: ListedUnitsQuery,
+        signal?: AbortSignal,
+    ): Promise<ListedUnitsPageDTO> => {
+        const response = await propertyManagerApiClient.get<ApiResponse<ListedUnitsPageDTO>>(
+            "/units",
+            { params: query, signal },
+        );
+
+        if (!response.data.success) {
+            throw new ApiError({
+                message: response.data.message ?? "UNIT_RETRIEVAL_FAILED",
+                data: null,
+                statusCode: response.status,
+            });
+        }
+
+        return response.data.data;
+    },
+
     getPropertiesByRentalProfileId: async (
         rentalProfileId: number,
         token: string,
