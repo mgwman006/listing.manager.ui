@@ -1,20 +1,20 @@
 @import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;1,500;1,600&display=swap");
 
-.listing-app {
-  --ink: #1d2c28;
-  --muted: #74817b;
-  --line: #e7ece8;
-  --green: #24574a;
-  --sage: #dce8df;
-  color: var(--ink);
-  min-height: 100vh;
+body {
+  margin: 0;
+  background: #fff;
   font-family: "DM Sans", sans-serif;
 }
 
+.listing-app {
+  min-height: 100vh;
+  color: #0f172a;
+}
+
 .listing-header {
-  height: 76px;
+  min-height: 72px;
   padding: 0 clamp(20px, 6vw, 88px);
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1px solid #e2e8f0;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -24,47 +24,37 @@
   display: inline-flex;
   align-items: center;
   gap: 12px;
-  color: var(--ink);
-  font-size: 15px;
+  color: #0f172a;
+  font-size: 14px;
   font-weight: 600;
   text-decoration: none;
-  letter-spacing: 0.02em;
 }
 
-.brand-mark {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  color: white;
-  background: var(--green);
-  font-family: "Playfair Display", serif;
-  font-size: 21px;
+.listing-brand img {
+  display: block;
+  width: 112px;
+  height: auto;
 }
 
 .header-signin {
-  color: var(--green);
+  color: #0f766e;
   font-weight: 600;
 }
 
 .listing-hero {
-  min-height: 350px;
-  padding: 60px clamp(20px, 9vw, 130px);
-  background: #f5f7f2;
+  min-height: 280px;
+  padding: 56px clamp(20px, 9vw, 130px);
+  background: #f8fafc;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  overflow: hidden;
 }
 
 .hero-copy {
-  max-width: 550px;
-  z-index: 1;
+  max-width: 580px;
 }
 
 .eyebrow {
-  color: #638172;
+  color: #0f766e;
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.14em;
@@ -73,7 +63,7 @@
 
 .hero-title.ant-typography {
   margin: 12px 0;
-  color: var(--ink);
+  color: #0f172a;
   font-family: "Playfair Display", serif;
   font-size: clamp(42px, 5vw, 68px);
   font-weight: 500;
@@ -81,103 +71,21 @@
 }
 
 .hero-title em {
-  color: var(--green);
+  color: #0f766e;
 }
 
 .hero-subtitle.ant-typography {
-  max-width: 420px;
+  max-width: 440px;
   margin-bottom: 0;
-  color: #697770;
+  color: #64748b;
   font-size: 15px;
   line-height: 1.8;
-}
-
-.hero-art {
-  width: min(40vw, 390px);
-  height: 260px;
-  position: relative;
-  align-self: flex-end;
-  margin-right: 5%;
-}
-
-.art-sun {
-  position: absolute;
-  top: 5px;
-  right: 34px;
-  width: 150px;
-  height: 150px;
-  border-radius: 50%;
-  background: #e9c78e;
-}
-
-.art-building {
-  position: absolute;
-  bottom: 0;
-  width: 180px;
-  height: 205px;
-  border-radius: 96px 96px 0 0;
-  box-shadow: inset 0 0 0 1px rgb(34 68 56 / 10%);
-}
-
-.art-building-back {
-  right: 30px;
-  height: 230px;
-  background: #bdcec0;
-}
-
-.art-building-front {
-  left: 15px;
-  background: #708e7d;
-}
-
-.art-building-front::before,
-.art-building-back::before {
-  content: "";
-  position: absolute;
-  inset: 36px 36px 0;
-  background: repeating-linear-gradient(
-    to bottom,
-    transparent 0 35px,
-    rgb(255 255 255 / 62%) 35px 53px
-  );
-}
-
-.art-plant {
-  position: absolute;
-  left: 205px;
-  bottom: 0;
-  width: 14px;
-  height: 72px;
-  border-radius: 10px 10px 0 0;
-  background: #496d5c;
-}
-
-.art-plant::before,
-.art-plant::after {
-  content: "";
-  position: absolute;
-  width: 45px;
-  height: 20px;
-  border-radius: 100% 0 100% 0;
-  background: #496d5c;
-}
-
-.art-plant::before {
-  right: 4px;
-  top: 17px;
-  transform: rotate(-25deg);
-}
-
-.art-plant::after {
-  left: 4px;
-  top: 38px;
-  transform: rotate(25deg) scaleX(-1);
 }
 
 .listing-content {
   max-width: 1440px;
   margin: 0 auto;
-  padding: 62px clamp(20px, 6vw, 88px) 72px;
+  padding: 56px clamp(20px, 6vw, 88px) 72px;
 }
 
 .list-heading {
@@ -185,13 +93,12 @@
   align-items: flex-end;
   justify-content: space-between;
   gap: 16px;
-  margin-bottom: 26px;
+  margin-bottom: 24px;
 }
 
-.list-heading .ant-typography h2,
 .list-heading h2.ant-typography {
   margin: 7px 0 0;
-  color: var(--ink);
+  color: #0f172a;
   font-family: "Playfair Display", serif;
   font-size: 34px;
   font-weight: 500;
@@ -203,7 +110,7 @@
   gap: 14px;
   margin-bottom: 24px;
   padding: 18px 18px 0;
-  border: 1px solid var(--line);
+  border: 1px solid #e2e8f0;
   border-radius: 12px;
 }
 
@@ -212,27 +119,21 @@
 }
 
 .listing-filters .ant-form-item-label > label {
-  color: #65746b;
+  color: #64748b;
   font-size: 12px;
   font-weight: 600;
 }
 
-.listing-filters .ant-input,
-.listing-filters .ant-select-selector {
-  border-color: #e3e9e4 !important;
-  border-radius: 7px !important;
-}
-
 .unit-card.ant-card {
   height: 100%;
-  border: 1px solid var(--line);
-  border-radius: 13px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
   overflow: hidden;
   transition: box-shadow 180ms ease, transform 180ms ease;
 }
 
 .unit-card.ant-card:hover {
-  box-shadow: 0 12px 32px rgb(31 64 50 / 11%);
+  box-shadow: 0 12px 32px rgb(15 23 42 / 10%);
   transform: translateY(-3px);
 }
 
@@ -244,7 +145,7 @@
   height: 180px;
   position: relative;
   overflow: hidden;
-  background: linear-gradient(135deg, #dce6da, #b9c9b9);
+  background: linear-gradient(135deg, #ccfbf1, #99f6e4);
 }
 
 .unit-cover::before,
@@ -266,19 +167,19 @@
   right: 10%;
   width: 35%;
   height: 110px;
-  background: rgb(67 103 83 / 24%);
+  background: rgb(15 118 110 / 24%);
 }
 
 .cover-1 {
-  background: linear-gradient(135deg, #e8dfd1, #d4c3a9);
+  background: linear-gradient(135deg, #fef3c7, #fcd34d);
 }
 
 .cover-2 {
-  background: linear-gradient(135deg, #d8e1e4, #a9bec0);
+  background: linear-gradient(135deg, #dbeafe, #bfdbfe);
 }
 
 .cover-3 {
-  background: linear-gradient(135deg, #e6ddd8, #c6aaa0);
+  background: linear-gradient(135deg, #f1f5f9, #cbd5e1);
 }
 
 .cover-label,
@@ -292,7 +193,7 @@
   left: 14px;
   padding: 6px 10px;
   border-radius: 20px;
-  color: var(--green);
+  color: #0f766e;
   background: rgb(255 255 255 / 88%);
   font-size: 10px;
   font-weight: 700;
@@ -303,7 +204,7 @@
 .cover-number {
   right: 13px;
   bottom: 7px;
-  color: rgb(255 255 255 / 84%);
+  color: rgb(15 23 42 / 70%);
   font-family: "Playfair Display", serif;
   font-size: 56px;
   line-height: 1;
@@ -314,15 +215,15 @@
 }
 
 .unit-card-heading {
+  min-height: 58px;
   display: flex;
   justify-content: space-between;
   gap: 8px;
-  min-height: 58px;
 }
 
 .unit-card-heading h4.ant-typography {
   margin: 0 0 5px;
-  color: var(--ink);
+  color: #0f172a;
   font-family: "Playfair Display", serif;
   font-size: 19px;
   font-weight: 500;
@@ -340,8 +241,8 @@
   height: fit-content;
   border: 0;
   border-radius: 20px;
-  color: var(--green);
-  background: #edf3ee;
+  color: #0f766e;
+  background: #ccfbf1;
   font-size: 10px;
   text-transform: capitalize;
 }
@@ -350,13 +251,13 @@
   display: flex;
   gap: 16px;
   padding: 15px 0;
-  border-bottom: 1px solid var(--line);
-  color: var(--muted);
+  border-bottom: 1px solid #e2e8f0;
+  color: #64748b;
   font-size: 12px;
 }
 
 .unit-stats strong {
-  color: var(--ink);
+  color: #0f172a;
   font-weight: 600;
 }
 
@@ -368,14 +269,14 @@
 }
 
 .unit-rent {
-  color: var(--green);
+  color: #0f766e;
   font-size: 20px;
   font-weight: 700;
 }
 
 .unit-card-footer .ant-btn-primary {
   color: white;
-  background: var(--green);
+  background: #0f766e;
   box-shadow: none;
 }
 
@@ -398,16 +299,16 @@
 .listing-footer {
   min-height: 72px;
   padding: 0 clamp(20px, 6vw, 88px);
-  border-top: 1px solid var(--line);
+  border-top: 1px solid #e2e8f0;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  color: #78857d;
+  color: #64748b;
   font-size: 12px;
 }
 
 .listing-footer span:first-child {
-  color: var(--green);
+  color: #0f766e;
   font-weight: 700;
 }
 
@@ -419,7 +320,7 @@
 .booking-form label {
   display: grid;
   gap: 7px;
-  color: #53635a;
+  color: #64748b;
   font-size: 13px;
   font-weight: 600;
 }
@@ -432,16 +333,12 @@
 
 @media (max-width: 700px) {
   .listing-hero {
-    min-height: 305px;
-    padding-block: 48px;
-  }
-
-  .hero-art {
-    display: none;
+    min-height: 260px;
+    padding-block: 42px;
   }
 
   .listing-content {
-    padding-top: 42px;
+    padding-top: 40px;
   }
 
   .listing-filters {

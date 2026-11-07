@@ -1,327 +1,74 @@
-import axios from 'axios';
-import { ApiResponse } from '../models/common';
-import { ApiError } from '../models/error';
-import { MembershipDetailsDTO, LeaseInvitationCreateDTO, LeaseInvitationDetailsDTO } from '../models/user';
-import { CreateRentalProfileDTO, RentalProfileDetailsDTO } from '../models/rentalprofile';
-import { LeaseCreateDTO, LeaseDetailsDTO, LeaseStatus, LeaseTermsUpdateDTO, MonthlyCollectionSummaryDTO, RentSummaryDTO } from '../models/lease';
-import { PaymentTransactionCreateDTO } from '../models/payments';
-import { CreateViewingBookingDTO, ViewingBookingDetailsDTO } from '../models/property';
-import { recordPayment } from '../services/paymentService';
+import axios from "axios";
+import { ApiResponse } from "../models/common";
+import { ApiError } from "../models/error";
+import { CreateViewingBookingDTO, ViewingBookingDetailsDTO } from "../models/property";
 
 const apiUrl = import.meta.env.VITE_RENT_MANAGER_API_URL;
 
-
 export const apiClient = axios.create({
-  baseURL: `${apiUrl}/rent-manager/v1`,
-  headers: {
-    'Content-Type': 'application/json',
-  },
+    baseURL: `${apiUrl}/rent-manager/v1`,
+    headers: {
+        "Content-Type": "application/json",
+    },
 });
 
-
 apiClient.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response) {
-      const { message, data, statusCode } = error.response.data;
+    (response) => response,
+    (error) => {
+        if (error.response) {
+            const { message, data, statusCode } = error.response.data ?? {};
+            return Promise.reject(
+                new ApiError({
+                    message: message ?? "SERVER_ERROR",
+                    data: data ?? null,
+                    statusCode: statusCode ?? error.response.status,
+                }),
+            );
+        }
 
-      return Promise.reject(
-        new ApiError({
-          message: message ?? "SERVER_ERROR",
-          data: data ?? null,
-          statusCode: statusCode ?? error.response.status,
-        })
-      );
-    }
+        if (error.request) {
+            return Promise.reject(
+                new ApiError({
+                    message: "NETWORK_ERROR",
+                    data: "No response from rent manager service",
+                    statusCode: 0,
+                }),
+            );
+        }
 
-    if (error.request) {
-      return Promise.reject(
-        new ApiError({
-          message: "NETWORK_ERROR",
-          data: "No response from server",
-          statusCode: 0,
-        })
-      );
-    }
-
-    return Promise.reject(
-      new ApiError({
-        message: "CLIENT_ERROR",
-        data: "Unexpected error occurred",
-        statusCode: 0,
-      })
-    );
-  }
+        return Promise.reject(
+            new ApiError({
+                message: "CLIENT_ERROR",
+                data: "Unexpected rent manager client error",
+                statusCode: 0,
+            }),
+        );
+    },
 );
 
-
-export const membershipApi = {
-  getAllMembershipsByPhoneNumber: async (phoneNumber: string, token: string) => {
-    const res = await apiClient.get<ApiResponse<MembershipDetailsDTO []>>(`/memberships/phone/${phoneNumber}`, {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    });
-
-    return handleResponse(res.data);
-  }
-};
-
-export const rentalProfileApi = {
-  createRentalProfile: async (requestBody: CreateRentalProfileDTO, token: string) => {
-    const res = await apiClient.post<ApiResponse<RentalProfileDetailsDTO>>(
-      `/rentalprofiles`,
-      requestBody,
-      {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      }
-    );
-
-    return handleResponse(res.data);
-  },
-
-  getRentalProfileDetails: async (rentalProfileId: number, token: string) => {
-    const res = await apiClient.get<ApiResponse<RentalProfileDetailsDTO>>(
-      `/rentalprofiles/${rentalProfileId}`,
-      {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      }
-    );
-
-    return handleResponse(res.data);
-  },
-
-  upgradeRentalProfile: async (rentalProfileId: number, organizationId: number, token: string) => {
-    const res = await apiClient.patch<ApiResponse<RentalProfileDetailsDTO>>(
-      `/rentalprofiles/${rentalProfileId}/upgrade/${organizationId}`,
-      {},
-      {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      }
-    );
-
-    return handleResponse(res.data);
-  },
-
-  getByUserIdOrOrganizationId: async (userId: number, organizationId: number, token: string) => {
-    const res = await apiClient.get<ApiResponse<RentalProfileDetailsDTO[]>>(
-      `/rentalprofiles/${userId}/${organizationId}`,
-      {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      }
-    );
-
-    return handleResponse(res.data);
-  }
-};
-
-export const leaseApi = {
-  getLeasesByRentalProfile: async (rentalProfileId: number, token: string) => {
-    const res = await apiClient.get<ApiResponse<LeaseDetailsDTO[]>>(
-      `/leases/rental-profile/${rentalProfileId}`,
-      {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      }
-    );
-
-    return handleResponse(res.data);
-  },
-
-  getLeasesByRentalProfileAndStatus: async (rentalProfileId: number,status:LeaseStatus, token: string) => {
-    const res = await apiClient.get<ApiResponse<LeaseDetailsDTO[]>>(
-      `/leases/rental-profile/${rentalProfileId}?status=${status}`,
-      {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      }
-    );
-
-    return handleResponse(res.data);
-  },
-
-  getLeaseById: async (id : number, token: string) => {
-    const res = await apiClient.get<ApiResponse<LeaseDetailsDTO>>(
-      `/leases/${id}`,
-      {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      }
-    );
-
-    return handleResponse(res.data);
-  },
-
-  createLease: async (requestBody: LeaseCreateDTO, token: string) => {
-    const res = await apiClient.post<ApiResponse<LeaseDetailsDTO>>(
-      `/leases/landlord`,
-      requestBody,
-      {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      }
-    );
-
-    return handleResponse(res.data);
-  },
-
-  updateLease: async (id: number, requestBody: LeaseTermsUpdateDTO, token: string) => {
-    const res = await apiClient.patch<ApiResponse<LeaseDetailsDTO>>(
-      `/leases/${id}/terms`,
-      requestBody,
-      {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      }
-    );
-
-    return handleResponse(res.data);
-  },
-
-  getRentCollectionSummary: async (leaseId: number, token: string) => {
-    const res = await apiClient.get<ApiResponse<RentSummaryDTO>>(
-      `/leases/rent/summary/${leaseId}`,
-      {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      }
-    );
-
-    return handleResponse(res.data);
-  },
-
-  getMonthlyCollectionSummary: async (rentalProfileId: number, month:number, year: number, token: string) => {
-    const res = await apiClient.get<ApiResponse<MonthlyCollectionSummaryDTO>>(
-      `/leases/rental-profile/${rentalProfileId}/monthly-rent-summary?month=${month}&year=${year}`,
-      {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      }
-    );
-
-    return handleResponse(res.data);
-  },
-};
-
-export const leaseInvitationApi = {
-
-  create: async (requestBody:LeaseInvitationCreateDTO, token:string) => {
-    const res = await apiClient.post<ApiResponse<LeaseInvitationDetailsDTO>>(
-      `/lease-invitations`,
-      requestBody,
-      {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      }
-    );
-
-    return handleResponse(res.data);
-  },
-    getActiveInvitationsByPhoneNumber: async (phoneNumber :string, jwtToken: string) => {
-        const results = await apiClient.get<ApiResponse<LeaseInvitationDetailsDTO[]>>(`/lease-invitations/phone/${phoneNumber}`,
+export const viewingApi = {
+    createBooking: async (
+        requestBody: CreateViewingBookingDTO,
+        token: string,
+    ): Promise<ViewingBookingDetailsDTO> => {
+        const response = await apiClient.post<ApiResponse<ViewingBookingDetailsDTO>>(
+            "/viewings/bookings",
+            requestBody,
             {
                 headers: {
-                'Authorization': `Bearer ${jwtToken}`
-                }
-            }
+                    Authorization: `Bearer ${token}`,
+                },
+            },
         );
-        return handleResponse(results.data);
+
+        if (!response.data.success) {
+            throw new ApiError({
+                message: response.data.message ?? "VIEWING_REQUEST_FAILED",
+                data: null,
+                statusCode: response.status,
+            });
+        }
+
+        return response.data.data;
     },
-
-  getByInvitationToken: async (invitationToken:string,jwtToken: string) => {
-    const res = await apiClient.get<ApiResponse<LeaseInvitationDetailsDTO>>(`/lease-invitations/${invitationToken}`,
-        {
-            headers: {
-            'Authorization': `Bearer ${jwtToken}`
-            }
-        }
-    );
-    return handleResponse(res.data);
-  },
-
-  acceptInvitation: async (invitationToken:string, id:number, jwtToken: string) => {
-    const res = await apiClient.post<ApiResponse<LeaseInvitationDetailsDTO>>(
-      `/lease-invitations/${invitationToken}/landlord/accept?landlordId=${id}`,
-      null,
-      {
-        headers: {
-          Authorization: `Bearer ${jwtToken}`,
-        },
-      }
-    );
-    return handleResponse(res.data);
-  },
-
-  getLeaseDetailsByInvitationToken: async (invitationToken:string, jwtToken:string) => {
-    const res = await apiClient.get<ApiResponse<LeaseDetailsDTO>>(`/lease-invitations/${invitationToken}/lease`,
-        {
-            headers: {
-                'Authorization': `Bearer ${jwtToken}`
-            }
-        }
-    );
-
-    return handleResponse(res.data);
-  }
 };
-
-export const paymentApi = {
-
-  recordPayment: async (rentalprofileId:number,requestBody: PaymentTransactionCreateDTO, token: string) => {
-    const res = await apiClient.post<ApiResponse<String>>(
-      `/payment-blocks/rental-profile/${rentalprofileId}/record-payment`,
-      requestBody,
-      {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      }
-    );
-
-    return handleResponse(res.data);
-  }
- 
-};
-
-export const viewingApi = {
-  createBooking: async (
-    requestBody: CreateViewingBookingDTO,
-    token: string,
-  ): Promise<ViewingBookingDetailsDTO> => {
-    const res = await apiClient.post<ApiResponse<ViewingBookingDetailsDTO>>(
-      `/viewings/bookings`,
-      requestBody,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      },
-    );
-
-    return handleResponse(res.data);
-  },
-};
-
-export function handleResponse<T>(response: ApiResponse<T>): T {
-  if (!response.success) {
-    throw new Error(response.message ?? "Request failed");
-  }
-
-  return response.data;
-}

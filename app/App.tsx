@@ -1,5 +1,6 @@
 import React from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ConfigProvider } from "antd";
 import routes from "./routes";
 
 type RouteConfig = {
@@ -22,8 +23,23 @@ function renderRoutes(routes: RouteConfig[]) {
 
 export default function App() {
 return (
-<BrowserRouter>
- <Routes>{renderRoutes(routes)}</Routes>
-</BrowserRouter>
+<ConfigProvider
+  theme={{
+    token: {
+      colorPrimary: "#0F766E",
+      colorInfo: "#0F766E",
+      colorText: "#0F172A",
+      colorTextSecondary: "#64748B",
+      colorBorder: "#E2E8F0",
+      colorBgLayout: "#F8FAFC",
+      borderRadius: 8,
+      fontFamily: '"DM Sans", sans-serif',
+    },
+  }}
+>
+  <BrowserRouter>
+    <Routes>{renderRoutes(routes)}</Routes>
+  </BrowserRouter>
+</ConfigProvider>
  );
 }

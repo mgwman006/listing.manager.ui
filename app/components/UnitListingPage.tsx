@@ -24,14 +24,12 @@ import {
     ListedUnitDTO,
     ListedUnitsPageDTO,
     ListedUnitsQuery,
-    UnitStatus,
     UnitType,
 } from "../models/property";
 import { AccountState } from "../models/user";
 import { useAccount } from "../store/account/AccountContext";
 import { createViewingBooking, getListedUnits } from "../services/unitListingService";
 import { isTokenExpired, navigateToAuth } from "../utilities/auth";
-import "./unitListingPage.css";
 
 const { Title, Text, Paragraph } = Typography;
 const PAGE_SIZE = 12;
@@ -125,8 +123,6 @@ export default function UnitListingPage() {
         size: PAGE_SIZE,
         sortBy: "rentAmount",
         direction: filters.direction,
-        listed: true,
-        status: UnitStatus.AVAILABLE,
         ...(filters.query.trim() && { query: filters.query.trim() }),
         ...(filters.city.trim() && { city: filters.city.trim() }),
         ...(filters.type && { type: filters.type }),
@@ -134,6 +130,8 @@ export default function UnitListingPage() {
         ...(filters.minRent && { minRent: Number(filters.minRent) }),
         ...(filters.maxRent && { maxRent: Number(filters.maxRent) }),
     }), [filters, pageNumber]);
+
+    const units = Array.isArray(page.content) ? page.content : [];
 
     useEffect(() => {
         const controller = new AbortController();
@@ -232,8 +230,7 @@ export default function UnitListingPage() {
             {contextHolder}
             <header className="listing-header">
                 <a className="listing-brand" href="/" aria-label="Home">
-                    <span className="brand-mark">la</span>
-                    <span>living, found.</span>
+                    <img src="/tante-logo.svg" alt="Tante" />
                 </a>
                 <Button
                     type="text"
@@ -253,12 +250,6 @@ export default function UnitListingPage() {
                         Thoughtful homes, ready when you are. Find a space that feels like the start of something.
                     </Paragraph>
                 </div>
-                <div className="hero-art" aria-hidden="true">
-                    <div className="art-sun" />
-                    <div className="art-building art-building-back" />
-                    <div className="art-building art-building-front" />
-                    <div className="art-plant" />
-                </div>
             </section>
 
             <section className="listing-content">
@@ -267,7 +258,7 @@ export default function UnitListingPage() {
                         <Text className="eyebrow">Find your fit</Text>
                         <Title level={2}>Homes for rent</Title>
                     </div>
-                    <Text type="secondary">{page.totalElements} places to explore</Text>
+                    <Text type="secondary">{page.totalElements ?? units.length} places to explore</Text>
                 </div>
 
                 <Form className="listing-filters" layout="vertical">
@@ -351,10 +342,10 @@ export default function UnitListingPage() {
 
                 {loading ? (
                     <div className="listing-loading"><Spin size="large" /></div>
-                ) : page.content.length ? (
+                ) : units.length ? (
                     <>
                         <Row gutter={[20, 24]}>
-                            {page.content.map((unit, index) => {
+                            {units.map((unit, index) => {
                                 const address = formatAddress(unit);
                                 const title = unit.listingTitle || unit.propertyName
                                     || unit.property?.name || unit.building?.property?.name
@@ -365,7 +356,9 @@ export default function UnitListingPage() {
                                             className="unit-card"
                                             cover={(
                                                 <div className={`unit-cover cover-${index % 4}`}>
-                                                    <span className="cover-label">Available now</span>
+                                                    <span className="cover-label">
+                                                        {unit.status ? formatType(unit.status) : "Status unavailable"}
+                                                    </span>
                                                     <span className="cover-number">
                                                         {String(unit.unitNumber).padStart(2, "0")}
                                                     </span>
@@ -386,8 +379,8 @@ export default function UnitListingPage() {
                                             <div className="unit-stats">
                                                 <span><strong>{unit.numberOfBedrooms}</strong> bed</span>
                                                 <span><strong>{unit.numberOfBathrooms}</strong> bath</span>
-                                                {unit.roomSize > 0 && (
-                                                    <span><strong>{unit.roomSize}</strong> {unit.sizeUnit}</span>
+                                                {(unit.size ?? unit.roomSize ?? 0) > 0 && (
+                                                    <span><strong>{unit.size ?? unit.roomSize}</strong> {unit.sizeUnit}</span>
                                                 )}
                                             </div>
                                             <div className="unit-card-footer">
@@ -432,7 +425,7 @@ export default function UnitListingPage() {
             </section>
 
             <footer className="listing-footer">
-                <span>la · living, found.</span>
+                <span>Tante</span>
                 <span>Find a place for what’s next.</span>
             </footer>
 
