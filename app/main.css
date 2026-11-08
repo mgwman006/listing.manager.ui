@@ -403,8 +403,7 @@ body {
   font-size: 56px;
 }
 
-.details-card,
-.details-action-card {
+.details-card {
   margin-top: 20px;
   border-color: #e2e8f0;
   border-radius: 12px;
@@ -414,19 +413,12 @@ body {
   color: #0f172a;
 }
 
-.details-action-card {
-  margin-top: 0;
-  background: #f8fafc;
-}
-
-.details-action-card h2.ant-typography {
-  margin: 8px 0 20px;
+.unit-detail-price-value.ant-typography {
+  margin: 0;
   color: #0f766e;
-}
-
-.details-action-card h2 .ant-typography-secondary {
-  font-size: 14px;
-  font-weight: 400;
+  font-size: clamp(20px, 2.2vw, 28px);
+  font-weight: 700;
+  white-space: nowrap;
 }
 
 @media (max-width: 1050px) {

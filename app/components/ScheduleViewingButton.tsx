@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Alert, Button, Input, Modal, notification, Typography } from "antd";
 import { ScheduleOutlined } from "@ant-design/icons";
-import { CreateViewingBookingDTO, ListedUnitDTO } from "../models/property";
+import { CreateViewingBookingDTO, UnitDetailsDTO } from "../models/property";
 import { useAccount } from "../store/account/AccountContext";
 import { createViewingBooking } from "../services/unitListingService";
 import { isTokenExpired, navigateToAuth } from "../utilities/auth";
@@ -14,7 +14,7 @@ const toLocalDateTimeInput = (date: Date) => {
 };
 
 type Props = {
-    unit: ListedUnitDTO;
+    unit: UnitDetailsDTO;
     block?: boolean;
 };
 

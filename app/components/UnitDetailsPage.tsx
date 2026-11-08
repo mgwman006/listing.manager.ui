@@ -5,7 +5,9 @@ import {
     Card,
     Col,
     Descriptions,
+    Divider,
     Empty,
+    Flex,
     Image,
     Row,
     Skeleton,
@@ -13,6 +15,7 @@ import {
     Tag,
     Typography,
 } from "antd";
+import type { TagProps } from "antd";
 import { ArrowLeftOutlined, EnvironmentOutlined, ShopOutlined } from "@ant-design/icons";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
@@ -24,7 +27,7 @@ import { AccountState } from "../models/user";
 import { useAccount } from "../store/account/AccountContext";
 import { isTokenExpired } from "../utilities/auth";
 import ScheduleViewingButton from "./ScheduleViewingButton";
-import { AddressDTO, UnitDetailsDTO, UnitImageDTO } from "../models/property";
+import { AddressDTO, UnitDetailsDTO, UnitImageDTO, UnitStatus } from "../models/property";
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -47,6 +50,21 @@ const formatRent = (rentAmount: number) => new Intl.NumberFormat("en-TZ", {
     currency: "TZS",
     maximumFractionDigits: 0,
 }).format(rentAmount);
+
+const getStatusColor = (status?: UnitStatus | null): TagProps["color"] => {
+    switch (status) {
+        case UnitStatus.AVAILABLE:
+            return "success";
+        case UnitStatus.OCCUPIED:
+            return "error";
+        case UnitStatus.MAINTENANCE:
+            return "warning";
+        case UnitStatus.RESERVED:
+            return "processing";
+        default:
+            return "default";
+    }
+};
 
 export default function UnitDetailsPage() {
     const { unitId } = useParams();
@@ -156,17 +174,26 @@ export default function UnitDetailsPage() {
                                     </div>
                                 )}
 
-                                <Card className="details-card" bordered={false}>
-                                    <Space direction="vertical" size={8}>
-                                        <Tag color="green">{formatLabel(unit.status)}</Tag>
+                                <Card className="details-card" >
+                                    <Flex vertical gap={8}>
+                                        <Flex align="center" justify="space-between">
+                                            <Title level={3} className="unit-detail-price-value">
+                                                {formatRent(unit.rentAmount)} / month
+                                            </Title>
+                                            <Tag color={getStatusColor(unit.status)} variant="solid">
+                                                {formatLabel(unit.status)}
+                                            </Tag>
+                                        </Flex>
                                         <Title level={2}>
                                             {`${unit.building.property.name} | Unit ${unit.unitNumber}`}
                                         </Title>
                                         <Text type="secondary">
                                             <EnvironmentOutlined /> {formatAddress(unit.building.property.location.address)}
                                         </Text>
-                                        <Paragraph>{unit.building.property.description || "Contact the rental manager to learn more about this home."}</Paragraph>
-                                    </Space>
+                                        <Paragraph>
+                                            {unit.building.property.description || "Contact the rental manager to learn more about this home."}
+                                        </Paragraph>
+                                    </Flex>
                                 </Card>
 
 
@@ -186,12 +213,6 @@ export default function UnitDetailsPage() {
                             </Col>
 
                             <Col xs={24} lg={9}>
-                                <Card className="details-action-card" bordered={false}>
-                                    <Text className="eyebrow">Monthly rent</Text>
-                                    <Title level={2}>{formatRent(unit.rentAmount)}<Text type="secondary"> / month</Text></Title>
-                                    <ScheduleViewingButton unit={unit} block />
-                                </Card>
-
                                 <Card
                                     title={<Space><ShopOutlined /> Agency</Space>}
                                     className="details-card"
@@ -227,6 +248,8 @@ export default function UnitDetailsPage() {
                                             description={`This listing is managed by agency ${unit.rentalProfileId}. Sign in to view its contact information.`}
                                         />
                                     )}
+                                    <Divider />
+                                    <ScheduleViewingButton unit={unit} block />
                                 </Card>
                             </Col>
                         </Row>
