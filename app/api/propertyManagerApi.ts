@@ -1,61 +1,12 @@
 import axios from "axios";
 import { ApiResponse } from "../models/common";
 import { ApiError } from "../models/error";
-import { ListedUnitDTO, ListedUnitsPageDTO, ListedUnitsQuery } from "../models/property";
+import {
+    ListedUnitsQuery,
+    PageDTO,
+    UnitDetailsDTO,
+} from "../models/property";
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-    typeof value === "object" && value !== null && !Array.isArray(value);
-
-const readUnits = (page: Record<string, unknown>): ListedUnitDTO[] | undefined => {
-    const units = page.content ?? page.units ?? page.listedUnits ?? page.items ?? page.results;
-    if (!Array.isArray(units)) return undefined;
-    return units as ListedUnitDTO[];
-};
-
-const normalizeListedUnitsPage = (
-    payload: unknown,
-    requestedPage: number,
-    requestedSize: number,
-): ListedUnitsPageDTO => {
-    if (!isRecord(payload)) {
-        throw new ApiError({
-            message: "INVALID_LISTING_RESPONSE",
-            data: "The property manager returned an invalid listings page.",
-            statusCode: 0,
-        });
-    }
-
-    const nestedPage = isRecord(payload.page) ? payload.page : undefined;
-    const content = readUnits(payload) ?? (nestedPage && readUnits(nestedPage));
-    if (!content) {
-        throw new ApiError({
-            message: "INVALID_LISTING_RESPONSE",
-            data: "The listings response must include a content, units, items, or results array.",
-            statusCode: 0,
-        });
-    }
-
-    const totalElements = Number(
-        payload.totalElements ?? payload.totalItems ?? payload.total ?? nestedPage?.totalElements,
-    );
-    const totalPages = Number(payload.totalPages ?? nestedPage?.totalPages);
-    const number = Number(
-        payload.number
-            ?? payload.pageNumber
-            ?? (typeof payload.page === "number" ? payload.page : nestedPage?.number),
-    );
-    const size = Number(payload.size ?? payload.pageSize ?? nestedPage?.size);
-
-    return {
-        content,
-        totalElements: Number.isFinite(totalElements) ? totalElements : content.length,
-        totalPages: Number.isFinite(totalPages)
-            ? totalPages
-            : Math.ceil(content.length / requestedSize),
-        number: Number.isFinite(number) ? number : requestedPage,
-        size: Number.isFinite(size) ? size : requestedSize,
-    };
-};
 
 const propertyManagerApiUrl = import.meta.env.VITE_PROPERTY_MANAGER_API_URL;
 const propertyManagerApiClient = axios.create({
@@ -100,23 +51,36 @@ propertyManagerApiClient.interceptors.response.use(
 );
 
 export const propertyManagerApi = {
-    getListedUnits: async (
+
+    getUnitById: async (
+        unitId: number,
+        signal?: AbortSignal,
+    ): Promise<UnitDetailsDTO> => {
+        const response = await propertyManagerApiClient.get<ApiResponse<UnitDetailsDTO>>(
+            `/units/${unitId}`,
+            { signal },
+        );
+
+        return handleResponse(response.data);
+    },
+
+    getUnits: async (
         query: ListedUnitsQuery,
         signal?: AbortSignal,
-    ): Promise<ListedUnitsPageDTO> => {
-        const response = await propertyManagerApiClient.get<ApiResponse<unknown>>(
+    ): Promise<PageDTO> => {
+        const response = await propertyManagerApiClient.get<ApiResponse<PageDTO>>(
             "/units",
             { params: query, signal },
         );
 
-        if (!response.data.success) {
-            throw new ApiError({
-                message: response.data.message ?? "UNIT_RETRIEVAL_FAILED",
-                data: null,
-                statusCode: response.status,
-            });
-        }
-
-        return normalizeListedUnitsPage(response.data.data, query.page, query.size);
+        return handleResponse(response.data);
     },
 };
+
+export function handleResponse<T>(response: ApiResponse<T>): T {
+  if (!response.success) {
+    throw new Error(response.message ?? "Request failed");
+  }
+
+  return response.data;
+}

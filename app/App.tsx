@@ -5,13 +5,18 @@ import routes from "./routes";
 
 type RouteConfig = {
   path: string;
+  index?: boolean;
   Component?: React.ComponentType<any>;
   children?: RouteConfig[];
 };
 
 function renderRoutes(routes: RouteConfig[]) {
-  return routes.map(({ path, Component, children }) => {
+  return routes.map(({ path, index, Component, children }) => {
     const RouteComponent = Component ?? React.Fragment;
+    if (index) {
+      return <Route key="index" index Component={RouteComponent} />;
+    }
+
     return (
       <Route key={path} path={path} Component={RouteComponent}>
         {children && renderRoutes(children)}

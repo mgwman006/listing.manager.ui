@@ -1,3 +1,19 @@
+
+export interface LocationDetailsDTO{
+  latitude:number,
+  longitude:number,
+  address:AddressDTO
+}
+
+export interface UnitImageDTO {
+  id: number;
+  url: string;
+  fileName: string;
+  contentType: string;
+  size: number;
+  primaryImage: boolean;
+}
+
 export interface AddressDTO {
     postalCode?: number;
     streetNumber?: number;
@@ -6,10 +22,9 @@ export interface AddressDTO {
     city?: string;
     region?: string;
     country?: string;
-    displayName?: string;
 }
 
-export interface ListedUnitDTO {
+export interface UnitDetailsDTO {
     id: number;
     unitNumber: string;
     rentalProfileId: number;
@@ -19,32 +34,106 @@ export interface ListedUnitDTO {
     rentAmount: number;
     type: UnitType;
     status?: UnitStatus | null;
-    size?: number;
     roomSize?: number;
     sizeUnit: string;
-    buildingId: number;
-    listed?: boolean;
-    description?: string;
-    listingTitle?: string;
-    buildingName?: string;
-    propertyName?: string;
-    address?: AddressDTO;
-    propertyAddress?: AddressDTO;
-    location?: { address?: AddressDTO };
-    building?: {
-        name?: string;
-        property?: { name?: string; location?: { address?: AddressDTO } };
-    };
-    property?: { name?: string; location?: { address?: AddressDTO } };
-    images?: Array<{ id: number; imageUrl?: string; url?: string }>;
+    isListed?: boolean;
+    building:BuildingSummaryDTO;
+    floorNumber: number;
+    images?: UnitImageDTO[];
 }
 
-export interface ListedUnitsPageDTO {
-    content: ListedUnitDTO[];
+export interface UnitSummaryDTO{
+  id : number;
+  unitNumber : string;
+  numberOfBedrooms: number;
+  numberOfBathrooms: number;
+  numberParkingSpots: number;
+  rentAmount: number;
+  type: UnitType;
+  status: UnitStatus;
+  roomSize: number;
+  sizeUnit: string;
+  isListed : boolean;
+  buildingId: number;
+  propertyName: string;
+  location: LocationDetailsDTO;
+  floorNumber: number;
+  images?: UnitImageDTO[];
+}
+
+export interface BuildingSummaryDTO{
+  id:number;
+  name:string,
+  number:number,
+  code:string,
+  description:string,
+  numberOfFloors: number,
+  property:PropertySummaryDTO
+}
+
+export interface PropertySummaryDTO{
+  id:number,
+  name:string,
+  code:string,
+  description:string,
+  landSize:number,
+  landSizeUnit:string,
+  location:LocationDetailsDTO,
+  type:PropertyType,
+  developmentStatus:DevelopmentStatus,
+  images:Array<PropertyImageDTO>
+}
+
+export interface PropertyImageDTO {
+  id: number;
+  url: string;
+  fileName: string;
+  contentType: string;
+  size: number;
+  primaryImage: boolean;
+}
+
+
+
+
+
+// export interface BuildingDetailsDTO {
+//     id: number;
+//     propertyId: number;
+//     name: string;
+//     number: number;
+//     code: string;
+//     description: string;
+//     numberOfFloors: number;
+//     units: ListedUnitDTO[];
+// }
+
+// export interface PropertyDetailsDTO {
+//     id: number;
+//     code: string;
+//     description: string;
+//     name: string;
+//     landSize: number;
+//     landSizeUnit: string;
+//     type: string;
+//     developmentStatus: string;
+//     location?: {
+//         latitude?: number;
+//         longitude?: number;
+//         address?: AddressDTO;
+//     };
+//     buildings: BuildingDetailsDTO[];
+//     images?: Array<{ id: number; url?: string; fileName?: string }>;
+// }
+
+export interface PageDTO {
+    items: UnitSummaryDTO[];
+    page: number;
+    size: number;
     totalElements: number;
     totalPages: number;
-    number: number;
-    size: number;
+    hasNext: boolean;
+    hasPrevious: boolean;
 }
 
 export interface ListedUnitsQuery {
@@ -52,7 +141,7 @@ export interface ListedUnitsQuery {
     size: number;
     sortBy: "rentAmount";
     direction: "asc" | "desc";
-    listed?: boolean;
+    isListed?: boolean;
     status?: UnitStatus;
     type?: UnitType;
     city?: string;
@@ -95,4 +184,26 @@ export enum UnitStatus {
     OCCUPIED = "OCCUPIED",
     MAINTENANCE = "MAINTENANCE",
     RESERVED = "RESERVED",
+}
+
+export enum PropertyStatus
+{
+  ACTIVE = "Active",
+  INACTIVE = "Inactive"
+}
+export enum DevelopmentStatus
+{
+  PLANNING = "Planning",
+  UNDER_CONSTRUCTION = "Under Construction",
+  COMPLETED = "Completed",
+  OPERATIONAL = "Operational"
+}
+
+export enum PropertyType
+{
+  LAND = "Land",
+  STAND_ALONE_HOUSE = "Stand Alone House",
+  APARTMENTS_BUILDING = "Apartments Building",
+  COMPOUND = "Compound",
+  COMPLEX = "Complex"
 }

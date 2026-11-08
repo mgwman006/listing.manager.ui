@@ -2,6 +2,7 @@ import axios from "axios";
 import { ApiResponse } from "../models/common";
 import { ApiError } from "../models/error";
 import { CreateViewingBookingDTO, ViewingBookingDetailsDTO } from "../models/property";
+import { RentalProfileDetailsDTO } from "../models/rentalProfile";
 
 const apiUrl = import.meta.env.VITE_RENT_MANAGER_API_URL;
 
@@ -64,6 +65,32 @@ export const viewingApi = {
         if (!response.data.success) {
             throw new ApiError({
                 message: response.data.message ?? "VIEWING_REQUEST_FAILED",
+                data: null,
+                statusCode: response.status,
+            });
+        }
+
+        return response.data.data;
+    },
+};
+
+export const rentalProfileApi = {
+    getById: async (
+        rentalProfileId: number,
+        token: string,
+    ): Promise<RentalProfileDetailsDTO> => {
+        const response = await apiClient.get<ApiResponse<RentalProfileDetailsDTO>>(
+            `/rentalprofiles/${rentalProfileId}`,
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            },
+        );
+
+        if (!response.data.success) {
+            throw new ApiError({
+                message: response.data.message ?? "RENTAL_PROFILE_RETRIEVAL_FAILED",
                 data: null,
                 statusCode: response.status,
             });
