@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Alert, Button, Input, Modal, notification, Typography } from "antd";
+import { Alert, Button, Form, Input, InputNumber, Modal, notification, Typography } from "antd";
 import { ScheduleOutlined } from "@ant-design/icons";
 import { CreateViewingBookingDTO, UnitDetailsDTO } from "../models/property";
 import { useAccount } from "../store/account/AccountContext";
@@ -7,6 +7,8 @@ import { createViewingBooking } from "../services/unitListingService";
 import { isTokenExpired, navigateToAuth } from "../utilities/auth";
 
 const { Paragraph } = Typography;
+
+type ViewingFormValues = CreateViewingBookingDTO;
 
 const toLocalDateTimeInput = (date: Date) => {
     const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
@@ -21,21 +23,26 @@ type Props = {
 export default function ScheduleViewingButton({ unit, block = false }: Props) {
     const { accountState } = useAccount();
     const [notificationApi, contextHolder] = notification.useNotification();
+    const [form] = Form.useForm<ViewingFormValues>();
     const [open, setOpen] = useState(false);
     const [submitting, setSubmitting] = useState(false);
-    const [startTime, setStartTime] = useState("");
-    const [endTime, setEndTime] = useState("");
-    const [notes, setNotes] = useState("");
     const [formError, setFormError] = useState<string | null>(null);
     const token = accountState.accountDetails?.token ?? "";
     const signedIn = Boolean(token && !isTokenExpired(token));
+    const startTime = Form.useWatch("startTime", form);
 
     const openModal = () => {
         const start = new Date(Date.now() + 24 * 60 * 60 * 1000);
         start.setHours(10, 0, 0, 0);
-        setStartTime(toLocalDateTimeInput(start));
-        setEndTime(toLocalDateTimeInput(new Date(start.getTime() + 30 * 60 * 1000)));
-        setNotes("");
+        form.setFieldsValue({
+            rentalProfileId: unit.rentalProfileId,
+            unitId: unit.id,
+            requesterUserAccountId: accountState.accountDetails?.id ?? 0,
+            serviceFee: 0,
+            startTime: toLocalDateTimeInput(start),
+            endTime: toLocalDateTimeInput(new Date(start.getTime() + 30 * 60 * 1000)),
+            notes: "",
+        });
         setFormError(null);
         setOpen(true);
     };
@@ -51,41 +58,31 @@ export default function ScheduleViewingButton({ unit, block = false }: Props) {
         navigateToAuth("rent-manager", undefined, window.location.href);
     };
 
-    const handleSubmit = async () => {
-        if (!signedIn) {
+    const handleSubmit = async (values: ViewingFormValues) => {
+        const requesterUserAccountId = accountState.accountDetails?.id;
+        if (!signedIn || requesterUserAccountId === undefined) {
             setFormError("Sign in to your account before requesting a viewing.");
-            return;
-        }
-        const start = new Date(startTime);
-        const end = new Date(endTime);
-        if (
-            !startTime
-            || !endTime
-            || Number.isNaN(start.getTime())
-            || Number.isNaN(end.getTime())
-            || start <= new Date()
-            || end <= start
-        ) {
-            setFormError("Choose a future start and end time. The end must be after the start.");
             return;
         }
 
         setFormError(null);
         setSubmitting(true);
         const request: CreateViewingBookingDTO = {
-            unitId: unit.id,
-            startTime,
-            endTime,
-            ...(notes.trim() && { notes: notes.trim() }),
+            ...values,
+            requesterUserAccountId,
+            ...(values.notes?.trim() && { notes: values.notes.trim() }),
         };
-        const booking = await createViewingBooking(request, token, notificationApi);
-        setSubmitting(false);
-        if (booking) {
-            notificationApi.success({
-                title: "Viewing request sent",
-                description: "The property manager will follow up about your requested time.",
-            });
-            setOpen(false);
+        try {
+            const booking = await createViewingBooking(request, token, notificationApi);
+            if (booking) {
+                notificationApi.success({
+                    title: "Viewing request sent",
+                    description: "The property manager will follow up about your requested time.",
+                });
+                setOpen(false);
+            }
+        } finally {
+            setSubmitting(false);
         }
     };
 
@@ -104,7 +101,7 @@ export default function ScheduleViewingButton({ unit, block = false }: Props) {
                 title="Request a viewing"
                 open={open}
                 onCancel={() => setOpen(false)}
-                onOk={handleSubmit}
+                onOk={() => form.submit()}
                 okText="Send request"
                 confirmLoading={submitting}
                 destroyOnHidden
@@ -127,33 +124,81 @@ export default function ScheduleViewingButton({ unit, block = false }: Props) {
                         />
                     )}
                     {formError && <Alert type="error" showIcon title={formError} />}
-                    <label>
-                        Preferred start
-                        <Input
-                            type="datetime-local"
-                            min={toLocalDateTimeInput(new Date())}
-                            value={startTime}
-                            onChange={(event) => setStartTime(event.target.value)}
-                        />
-                    </label>
-                    <label>
-                        Preferred end
-                        <Input
-                            type="datetime-local"
-                            min={startTime || toLocalDateTimeInput(new Date())}
-                            value={endTime}
-                            onChange={(event) => setEndTime(event.target.value)}
-                        />
-                    </label>
-                    <label>
-                        Note to the property manager (optional)
-                        <Input.TextArea
-                            rows={3}
-                            maxLength={500}
-                            value={notes}
-                            onChange={(event) => setNotes(event.target.value)}
-                        />
-                    </label>
+                    <Form
+                        form={form}
+                        layout="vertical"
+                        onFinish={handleSubmit}
+                    >
+                        <Form.Item label="Agency" name="rentalProfileId">
+                            <InputNumber disabled controls={false} style={{ width: "100%" }} />
+                        </Form.Item>
+
+                        <Form.Item label="Unit" name="unitId">
+                            <InputNumber disabled controls={false} style={{ width: "100%" }} />
+                        </Form.Item>
+
+                        {signedIn && (
+                            <Form.Item label="Requester account" name="requesterUserAccountId">
+                                <InputNumber disabled controls={false} style={{ width: "100%" }} />
+                            </Form.Item>
+                        )}
+                        <Form.Item name="serviceFee" hidden>
+                            <InputNumber />
+                        </Form.Item>
+
+                        <Form.Item
+                            label="Preferred start"
+                            name="startTime"
+                            rules={[
+                                { required: true, message: "Choose a preferred start time." },
+                                {
+                                    validator: (_, value?: string) => {
+                                        if (!value) return Promise.resolve();
+                                        const start = new Date(value);
+                                        return !Number.isNaN(start.getTime()) && start > new Date()
+                                            ? Promise.resolve()
+                                            : Promise.reject(new Error("Start time must be in the future."));
+                                    },
+                                },
+                            ]}
+                        >
+                            <Input
+                                type="datetime-local"
+                                min={toLocalDateTimeInput(new Date())}
+                            />
+                        </Form.Item>
+                        <Form.Item
+                            label="Preferred end"
+                            name="endTime"
+                            dependencies={["startTime"]}
+                            rules={[
+                                { required: true, message: "Choose a preferred end time." },
+                                ({ getFieldValue }) => ({
+                                    validator: (_, value?: string) => {
+                                        if (!value) return Promise.resolve();
+                                        const end = new Date(value);
+                                        const start = new Date(getFieldValue("startTime"));
+                                        return !Number.isNaN(end.getTime())
+                                            && !Number.isNaN(start.getTime())
+                                            && end > start
+                                            ? Promise.resolve()
+                                            : Promise.reject(new Error("End time must be after the start time."));
+                                    },
+                                }),
+                            ]}
+                        >
+                            <Input
+                                type="datetime-local"
+                                min={startTime || toLocalDateTimeInput(new Date())}
+                            />
+                        </Form.Item>
+                        <Form.Item
+                            label="Note to the property manager (optional)"
+                            name="notes"
+                        >
+                            <Input.TextArea rows={3} maxLength={500} />
+                        </Form.Item>
+                    </Form>
                 </div>
             </Modal>
         </>

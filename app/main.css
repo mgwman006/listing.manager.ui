@@ -357,14 +357,6 @@ body {
   gap: 16px;
 }
 
-.booking-form label {
-  display: grid;
-  gap: 7px;
-  color: #64748b;
-  font-size: 13px;
-  font-weight: 600;
-}
-
 .unit-details-content {
   max-width: 1440px;
   min-height: calc(100vh - 144px);
