@@ -40,6 +40,7 @@ export interface UnitDetailsDTO {
     building:BuildingSummaryDTO;
     floorNumber: number;
     images?: UnitImageDTO[];
+    agents: number[];
 }
 
 export interface UnitSummaryDTO{

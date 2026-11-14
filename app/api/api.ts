@@ -3,8 +3,12 @@ import { ApiResponse } from "../models/common";
 import { ApiError } from "../models/error";
 import { CreateViewingBookingDTO, ViewingBookingDetailsDTO } from "../models/property";
 import { RentalProfileDetailsDTO } from "../models/rentalProfile";
+import { navigateToAuth } from "../utilities/auth";
+import { ACCOUNT_STORAGE_KEY } from "../utilities/constant";
+import { removeFromLocalStorage } from "../utilities/localStorage";
 
 const apiUrl = import.meta.env.VITE_RENT_MANAGER_API_URL;
+let authRedirectInProgress = false;
 
 export const apiClient = axios.create({
     baseURL: `${apiUrl}/rent-manager/v1`,
@@ -17,6 +21,12 @@ apiClient.interceptors.response.use(
     (response) => response,
     (error) => {
         if (error.response) {
+            if (error.response.status === 401 && !authRedirectInProgress) {
+                authRedirectInProgress = true;
+                removeFromLocalStorage(ACCOUNT_STORAGE_KEY);
+                navigateToAuth("rent-manager", undefined, window.location.href);
+            }
+
             const { message, data, statusCode } = error.response.data ?? {};
             return Promise.reject(
                 new ApiError({

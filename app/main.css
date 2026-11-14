@@ -289,7 +289,6 @@ body {
   display: -webkit-box;
   overflow: hidden;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 1;
   font-size: 11px;
 }
 
