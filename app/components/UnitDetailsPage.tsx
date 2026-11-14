@@ -36,7 +36,7 @@ const formatLabel = (value?: string | null) =>
 
 const formatAddress = (address: AddressDTO) => { 
     return [
-        address?.streetNumber,
+        address?.houseNumber,
         address?.streetName,
         address?.ward,
         address?.city,
@@ -221,12 +221,6 @@ export default function UnitDetailsPage() {
                                         <Descriptions column={1} size="small">
                                             <Descriptions.Item label="Name">{rentalProfile.name}</Descriptions.Item>
                                             <Descriptions.Item label="Agency type">{formatLabel(rentalProfile.type)}</Descriptions.Item>
-                                            <Descriptions.Item label="Email">
-                                                {rentalProfile.email || "Not provided"}
-                                            </Descriptions.Item>
-                                            <Descriptions.Item label="Phone">
-                                                {rentalProfile.phoneNumber || "Not provided"}
-                                            </Descriptions.Item>
                                             {rentalProfile.organizationId && (
                                                 <Descriptions.Item label="Organization ID">
                                                     {rentalProfile.organizationId}
@@ -249,7 +243,11 @@ export default function UnitDetailsPage() {
                                         />
                                     )}
                                     <Divider />
-                                    <ScheduleViewingButton unit={unit} block />
+                                    <ScheduleViewingButton
+                                        unit={unit}
+                                        viewingServiceFee={rentalProfile?.viewingServiceFee ?? null}
+                                        block
+                                    />
                                 </Card>
                             </Col>
                         </Row>

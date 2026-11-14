@@ -42,7 +42,7 @@ const formatType = (type: string) => type.toLowerCase().replaceAll("_", " ");
 
 const formatAddress = (address: AddressDTO) => {
     return [
-        address?.streetNumber,
+        address?.houseNumber,
         address?.streetName,
         address?.city,
         address?.region,
