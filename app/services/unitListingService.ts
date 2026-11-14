@@ -1,13 +1,17 @@
 import { NotificationInstance } from "antd/es/notification/interface";
 import { propertyManagerApi } from "../api/propertyManagerApi";
 import { viewingApi } from "../api/api";
+import { rentalProfileApi } from "../api/api";
 import {
     CreateViewingBookingDTO,
-    ListedUnitsPageDTO,
     ListedUnitsQuery,
+    PageDTO,
+    PropertySummaryDTO,
+    UnitDetailsDTO,
     ViewingBookingDetailsDTO,
 } from "../models/property";
 import { ApiError } from "../models/error";
+import { RentalProfileDetailsDTO } from "../models/rentalProfile";
 
 const notifyApiError = (
     notificationApi: NotificationInstance,
@@ -27,10 +31,18 @@ const notifyApiError = (
     });
 };
 
-export const getListedUnits = async (
+export const getPaginatedUnits = async (
     query: ListedUnitsQuery,
     signal: AbortSignal,
-): Promise<ListedUnitsPageDTO> => propertyManagerApi.getListedUnits(query, signal);
+): Promise<PageDTO> => propertyManagerApi.getUnits(query, signal);
+
+export const getUnitById = (unitId: number, signal?: AbortSignal) =>propertyManagerApi.getUnitById(unitId, signal);
+
+
+export const getRentalProfileById = (
+    rentalProfileId: number,
+    token: string,
+): Promise<RentalProfileDetailsDTO> => rentalProfileApi.getById(rentalProfileId, token);
 
 export const createViewingBooking = async (
     request: CreateViewingBookingDTO,
